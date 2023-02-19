@@ -32,11 +32,23 @@ impl Task {
 
     pub fn view(&self, _id: usize) -> iced::Element<TaskMessage> {
         let title_display = text(&self.title);
+
         let delete_button = button(text(TRASH_CAN_ICON).font(ICONS))
             .on_press(TaskMessage::Delete)
             .padding(10)
             .style(theme::Button::Destructive);
 
+        // TODO Make an element that doesent look like crap
+        row![
+            title_display,
+            self.status_change_buttons(),
+            delete_button.width(40)
+        ]
+        .spacing(20)
+        .into()
+    }
+
+    fn status_change_buttons(&self) -> iced::Element<TaskMessage> {
         let todo_button = button(text(LEFT_ARROW_ICON).font(ICONS))
             .on_press(TaskMessage::MarkAs(TaskStatus::Todo));
 
@@ -49,7 +61,7 @@ impl Task {
         let done_button = button(text(RIGHT_ARROW_ICON).font(ICONS))
             .on_press(TaskMessage::MarkAs(TaskStatus::Done));
 
-        let task_status_buttons = match self.task_status {
+        match self.task_status {
             TaskStatus::Todo => {
                 row![in_progress_button_right_arrow]
             }
@@ -59,15 +71,8 @@ impl Task {
             TaskStatus::Done => {
                 row![in_progress_button_left_arrow]
             }
-        };
-
-        // TODO Make an element that doesent look like crap
-        row![
-            title_display,
-            task_status_buttons.width(80),
-            delete_button.width(40)
-        ]
-        .spacing(20)
+        }
+        .width(80)
         .into()
     }
 }

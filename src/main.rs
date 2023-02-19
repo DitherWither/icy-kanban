@@ -70,29 +70,11 @@ impl iced::Sandbox for TodoApplication {
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        // TODO seperate this into different functions, this is getting too long
-
         let title = text("Kanban Board").size(80);
 
-        let text_input = text_input(
-            "Enter new task",
-            &self.text_input,
-            Message::TextFieldChanged,
-        );
-        let new_task_button = button("New Task").on_press(Message::CreateTask);
+        let new_task_display = self.new_task_display();
 
-        let new_task_display = row![text_input, new_task_button];
-
-        let todo_display =
-            self.get_task_display(|elem| elem.task_status == TaskStatus::Todo, "To Do");
-        let in_progress_display = self.get_task_display(
-            |elem| elem.task_status == TaskStatus::InProgress,
-            "In Progress",
-        );
-        let done_display =
-            self.get_task_display(|elem| elem.task_status == TaskStatus::Done, "Done");
-
-        let tasks_display = row![todo_display, in_progress_display, done_display].spacing(30);
+        let tasks_display = self.current_tasks_display();
 
         let content = column![title, new_task_display, tasks_display].spacing(20);
 
@@ -108,7 +90,7 @@ impl iced::Sandbox for TodoApplication {
 
 impl TodoApplication {
     /// Creates a display for task using a iterator-filter like closure
-    fn get_task_display<F>(&self, mut filter_fn: F, heading_text: &str) -> iced::Element<Message>
+    fn get_filtered_task_display<F>(&self, mut filter_fn: F, heading_text: &str) -> iced::Element<Message>
     where
         F: FnMut(&&Task) -> bool,
     {
@@ -130,6 +112,34 @@ impl TodoApplication {
         .width(Length::Fill)
         .into()
     }
+
+    /// Returns an iced widget that can be used to create a new task
+    fn new_task_display(&self) -> iced::Element<Message> {
+        let text_input = text_input(
+            "Enter new task",
+            &self.text_input,
+            Message::TextFieldChanged,
+        );
+        let new_task_button = button("New Task").on_press(Message::CreateTask);
+
+        row![text_input, new_task_button].into()
+    }
+
+    /// Returns an iced widget that displays all tasks, sorted into "To do", 
+    /// "In Progress", and "Done"
+    fn current_tasks_display(&self) -> iced::Element<Message> {
+        let todo_display =  
+            self.get_filtered_task_display(|elem| elem.task_status == TaskStatus::Todo, "To Do");
+        let in_progress_display = self.get_filtered_task_display(
+            |elem| elem.task_status == TaskStatus::InProgress,
+            "In Progress",
+        );
+        let done_display =
+            self.get_filtered_task_display(|elem| elem.task_status == TaskStatus::Done, "Done");
+
+        row![todo_display, in_progress_display, done_display].spacing(30).into()
+    }
+
 
     /// Creates and adds a new task to the application
     fn add_task(&mut self, title: impl Display) {
