@@ -6,6 +6,8 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
     steps:
       - uses: actions-rs/toolchain@v1
         with:
@@ -23,6 +25,6 @@ jobs:
         with:
           # Path of the directory containing the static assets.
           path: ./dist
-          
+
       - name: Deploy GitHub Pages site
         uses: actions/deploy-pages@v1.2.4
