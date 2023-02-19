@@ -124,9 +124,10 @@ impl TodoApplication {
             "Enter new task",
             &self.text_input,
             Message::TextFieldChanged,
-        ).on_submit(Message::CreateTask);
+        )
+        .on_submit(Message::CreateTask);
         let new_task_button = button(PLUS_ICON).on_press(Message::CreateTask);
- 
+
         row![text_input, new_task_button].spacing(5).into()
     }
 
