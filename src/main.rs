@@ -25,7 +25,7 @@ fn main() -> Result<(), iced::Error> {
 
 #[derive(Debug, Clone)]
 enum Message {
-    TaskMessage(usize, TaskMessage),
+    TaskChanged(usize, TaskMessage),
     TextFieldChanged(String),
     CreateTask,
 }
@@ -51,11 +51,11 @@ impl iced::Sandbox for TodoApplication {
 
     fn update(&mut self, message: Self::Message) {
         match message {
-            Message::TaskMessage(i, TaskMessage::Delete) => {
+            Message::TaskChanged(i, TaskMessage::Delete) => {
                 self.task_list.remove(i);
             }
 
-            Message::TaskMessage(i, message) => {
+            Message::TaskChanged(i, message) => {
                 // If the index doesn't exist, just ingore the message
                 if let Some(task) = self.task_list.get_mut(i) {
                     task.update(message);
@@ -90,7 +90,11 @@ impl iced::Sandbox for TodoApplication {
 
 impl TodoApplication {
     /// Creates a display for task using a iterator-filter like closure
-    fn get_filtered_task_display<F>(&self, mut filter_fn: F, heading_text: &str) -> iced::Element<Message>
+    fn get_filtered_task_display<F>(
+        &self,
+        mut filter_fn: F,
+        heading_text: &str,
+    ) -> iced::Element<Message>
     where
         F: FnMut(&&Task) -> bool,
     {
@@ -103,7 +107,7 @@ impl TodoApplication {
                     .filter(|(_, elem)| filter_fn(elem))
                     .map(|(i, elem)| {
                         elem.view(i)
-                            .map(move |message| Message::TaskMessage(i, message))
+                            .map(move |message| Message::TaskChanged(i, message))
                     })
                     .collect(),
             )
@@ -125,10 +129,10 @@ impl TodoApplication {
         row![text_input, new_task_button].into()
     }
 
-    /// Returns an iced widget that displays all tasks, sorted into "To do", 
+    /// Returns an iced widget that displays all tasks, sorted into "To do",
     /// "In Progress", and "Done"
     fn current_tasks_display(&self) -> iced::Element<Message> {
-        let todo_display =  
+        let todo_display =
             self.get_filtered_task_display(|elem| elem.task_status == TaskStatus::Todo, "To Do");
         let in_progress_display = self.get_filtered_task_display(
             |elem| elem.task_status == TaskStatus::InProgress,
@@ -137,9 +141,10 @@ impl TodoApplication {
         let done_display =
             self.get_filtered_task_display(|elem| elem.task_status == TaskStatus::Done, "Done");
 
-        row![todo_display, in_progress_display, done_display].spacing(30).into()
+        row![todo_display, in_progress_display, done_display]
+            .spacing(30)
+            .into()
     }
-
 
     /// Creates and adds a new task to the application
     fn add_task(&mut self, title: impl Display) {
