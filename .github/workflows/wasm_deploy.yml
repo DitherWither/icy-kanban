@@ -1,9 +1,7 @@
 name: Wasm Deploy
 on:
-  workflow_run:
-    branches: [main]
-    workflows: [Continuous integration]
-    types: [completed]
+  push:
+  pull_request:
 
 jobs:
   release:
