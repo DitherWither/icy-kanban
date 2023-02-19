@@ -48,7 +48,7 @@ impl iced::Sandbox for TodoApplication {
     }
 
     fn title(&self) -> String {
-        "Todo Application".to_string()
+        "KanBan Board Application".to_string()
     }
 
     fn update(&mut self, message: Self::Message) {
@@ -75,7 +75,7 @@ impl iced::Sandbox for TodoApplication {
     fn view(&self) -> iced::Element<'_, Self::Message> {
         // TODO seperate this into different functions, this is getting too long
 
-        let title = text("Todos").size(80);
+        let title = text("Kanban Board").size(80);
 
         let text_input = text_input(
             "Enter new task",
