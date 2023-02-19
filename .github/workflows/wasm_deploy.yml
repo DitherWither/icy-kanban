@@ -1,28 +1,31 @@
 name: Wasm Deploy
 on:
-  workflow_run:
-    branches: [main]
-    workflows: [Continuous integration]
-    types: [completed]
+  push:
 
 jobs:
   release:
     runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      pages: write
     steps:
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           target: wasm32-unknown-unknown
 
       - uses: jetli/trunk-action@v0.1.0
-      - uses: jetli/wasm-bindgen-action@v0.1.0
 
       - uses: actions/checkout@v2
 
-      - run: trunk build --release
+      - run: trunk build --release --public-url /icy-kanban/
 
-      - uses: peaceiris/actions-gh-pages@v3
-        if: github.ref == 'refs/heads/main'
+      - name: Upload GitHub Pages artifact
+        uses: actions/upload-pages-artifact@v1.0.7
         with:
-          github_token: $
-          publish_dir: ./dist
+          # Path of the directory containing the static assets.
+          path: ./dist
+
+      - name: Deploy GitHub Pages site
+        uses: actions/deploy-pages@v1.2.4
