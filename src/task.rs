@@ -58,18 +58,23 @@ impl Task {
         let in_progress_button_left_arrow = button(text(LEFT_ARROW_ICON).font(ICONS))
             .on_press(TaskMessage::MarkAs(TaskStatus::InProgress));
 
+        // greyed out buttons that don't do anything
+        // Not showing them makes the widget look bad
+        let disabled_left_arrow = button(text(LEFT_ARROW_ICON).font(ICONS));
+        let disabled_right_arrow = button(text(RIGHT_ARROW_ICON).font(ICONS));
+
         let done_button = button(text(RIGHT_ARROW_ICON).font(ICONS))
-            .on_press(TaskMessage::MarkAs(TaskStatus::Done));
+            .on_press(TaskMessage::MarkAs(TaskStatus::Done)); 
 
         match self.task_status {
             TaskStatus::Todo => {
-                row![in_progress_button_right_arrow]
+                row![disabled_left_arrow, in_progress_button_right_arrow]
             }
             TaskStatus::InProgress => {
                 row![todo_button, done_button]
             }
             TaskStatus::Done => {
-                row![in_progress_button_left_arrow]
+                row![in_progress_button_left_arrow, disabled_right_arrow]
             }
         }
         .width(80)
