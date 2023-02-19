@@ -1,7 +1,6 @@
 name: Wasm Deploy
 on:
   push:
-  pull_request:
 
 jobs:
   release:
@@ -10,6 +9,7 @@ jobs:
       id-token: write
       pages: write
     steps:
+      - uses: Swatinem/rust-cache@v2
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
@@ -19,7 +19,7 @@ jobs:
 
       - uses: actions/checkout@v2
 
-      - run: trunk build --release
+      - run: trunk build --release --public-url /icy-kanban/
 
       - name: Upload GitHub Pages artifact
         uses: actions/upload-pages-artifact@v1.0.7
