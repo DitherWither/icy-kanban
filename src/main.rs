@@ -1,6 +1,8 @@
 mod task;
+use std::fmt::Display;
+
 use iced::{
-    widget::{column, container, row, scrollable, text},
+    widget::{button, column, container, row, scrollable, text, text_input},
     Font, Length, Sandbox,
 };
 use task::{Task, TaskMessage};
@@ -21,25 +23,28 @@ fn main() -> Result<(), iced::Error> {
     TodoApplication::run(iced::Settings::default())
 }
 
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone)]
 enum Message {
     TaskMessage(usize, TaskMessage),
+    TextFieldChanged(String),
+    CreateTask,
 }
 
 struct TodoApplication {
-    task_list: Vec<(usize, Task)>,
+    task_list: Vec<Task>,
+    text_input: String,
 }
 
 impl iced::Sandbox for TodoApplication {
     type Message = Message;
 
     fn new() -> Self {
-        TodoApplication {
-            task_list: vec![
-                (0, Task::new("This is task".to_string())),
-                (1, Task::new("This is also a task".to_string())),
-            ],
-        }
+        let mut application = TodoApplication {
+            task_list: Vec::new(),
+            text_input: "".to_string(),
+        };
+
+        application
     }
 
     fn title(&self) -> String {
@@ -55,27 +60,44 @@ impl iced::Sandbox for TodoApplication {
             Message::TaskMessage(i, message) => {
                 // If the index doesn't exist, just ingore the message
                 if let Some(task) = self.task_list.get_mut(i) {
-                    task.1.update(message);
+                    task.update(message);
                 };
             }
+            Message::TextFieldChanged(s) => self.text_input = s,
+            Message::CreateTask => {
+                self.add_task(self.text_input.clone().trim());
+                self.text_input = String::new();
+            }
+            
         }
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
+        // TODO seperate this into different functions, this is getting too long
+
         let title = text("Todos").size(80);
 
+        let text_input = text_input(
+            "Enter new task",
+            &self.text_input,
+            Message::TextFieldChanged,
+        );
+        let new_task_button = button("New Task").on_press(Message::CreateTask);
+
+        let new_task_display = row![text_input, new_task_button];
+
         let todo_display =
-            self.get_task_display(|elem| elem.1.task_status == TaskStatus::Todo, "To Do");
+            self.get_task_display(|elem| elem.task_status == TaskStatus::Todo, "To Do");
         let in_progress_display = self.get_task_display(
-            |elem| elem.1.task_status == TaskStatus::InProgress,
+            |elem| elem.task_status == TaskStatus::InProgress,
             "In Progress",
         );
         let done_display =
-            self.get_task_display(|elem| elem.1.task_status == TaskStatus::Done, "Done");
+            self.get_task_display(|elem| elem.task_status == TaskStatus::Done, "Done");
 
         let tasks_display = row![todo_display, in_progress_display, done_display].spacing(30);
 
-        let content = column![title, tasks_display].spacing(20);
+        let content = column![title, new_task_display, tasks_display].spacing(20);
 
         scrollable(
             container(content)
@@ -88,20 +110,21 @@ impl iced::Sandbox for TodoApplication {
 }
 
 impl TodoApplication {
-    fn get_task_display<F>(&self, filter_fn: F, heading_text: &str) -> iced::Element<Message>
+    /// Creates a display for task using a iterator-filter like closure
+    fn get_task_display<F>(&self, mut filter_fn: F, heading_text: &str) -> iced::Element<Message>
     where
-        F: FnMut(&&(usize, Task)) -> bool,
+        F: FnMut(&&Task) -> bool,
     {
         column![
             text(heading_text).size(40),
             column(
                 self.task_list
                     .iter()
-                    .filter(filter_fn)
-                    .map(|elem| {
-                        elem.1
-                            .view(elem.0)
-                            .map(move |message| Message::TaskMessage(elem.0, message))
+                    .enumerate()
+                    .filter(|(_, elem)| filter_fn(elem))
+                    .map(|(i, elem)| {
+                        elem.view(i)
+                            .map(move |message| Message::TaskMessage(i, message))
                     })
                     .collect(),
             )
@@ -109,5 +132,10 @@ impl TodoApplication {
         ]
         .width(Length::Fill)
         .into()
+    }
+
+    /// Creates and adds a new task to the application
+    fn add_task(&mut self, title: impl Display) {
+        self.task_list.push(Task::new(title.to_string()));
     }
 }
