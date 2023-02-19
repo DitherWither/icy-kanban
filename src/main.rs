@@ -18,6 +18,7 @@ const ICONS: Font = Font::External {
 const RIGHT_ARROW_ICON: &str = "\u{f061}";
 const LEFT_ARROW_ICON: &str = "\u{f060}";
 const TRASH_CAN_ICON: &str = "\u{f2ed}";
+const PLUS_ICON: &str = "\u{2b}";
 
 fn main() -> Result<(), iced::Error> {
     TodoApplication::run(iced::Settings::default())
@@ -123,10 +124,10 @@ impl TodoApplication {
             "Enter new task",
             &self.text_input,
             Message::TextFieldChanged,
-        );
-        let new_task_button = button("New Task").on_press(Message::CreateTask);
-
-        row![text_input, new_task_button].into()
+        ).on_submit(Message::CreateTask);
+        let new_task_button = button(PLUS_ICON).on_press(Message::CreateTask);
+ 
+        row![text_input, new_task_button].spacing(5).into()
     }
 
     /// Returns an iced widget that displays all tasks, sorted into "To do",
