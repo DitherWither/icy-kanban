@@ -3,6 +3,7 @@ use std::fmt::Display;
 use iced::{
     theme,
     widget::{button, row, text},
+    Alignment, Length,
 };
 
 use crate::{ICONS, LEFT_ARROW_ICON, RIGHT_ARROW_ICON, TRASH_CAN_ICON};
@@ -31,40 +32,42 @@ impl Task {
     }
 
     pub fn view(&self, _id: usize) -> iced::Element<TaskMessage> {
-        let title_display = text(&self.title);
+        let title_display = text(&self.title).width(Length::Fill).size(25);
 
-        let delete_button = button(text(TRASH_CAN_ICON).font(ICONS))
+        let delete_button = button(text(TRASH_CAN_ICON).font(ICONS).size(20))
             .on_press(TaskMessage::Delete)
             .padding(10)
-            .style(theme::Button::Destructive);
+            .style(theme::Button::Destructive)
+            .width(40);
 
-        // TODO Make an element that doesent look like crap
-        row![
-            title_display,
-            self.status_change_buttons(),
-            delete_button.width(40)
-        ]
-        .spacing(20)
-        .into()
+        let buttons_display = row![self.status_change_buttons(), delete_button]
+            .align_items(iced::Alignment::End)
+            .spacing(10);
+
+        row![title_display, buttons_display].spacing(30).into()
     }
 
     fn status_change_buttons(&self) -> iced::Element<TaskMessage> {
-        let todo_button = button(text(LEFT_ARROW_ICON).font(ICONS))
-            .on_press(TaskMessage::MarkAs(TaskStatus::Todo));
+        let todo_button = button(text(LEFT_ARROW_ICON).font(ICONS).size(30))
+            .on_press(TaskMessage::MarkAs(TaskStatus::Todo))
+            .padding(5);
 
-        let in_progress_button_right_arrow = button(text(RIGHT_ARROW_ICON).font(ICONS))
-            .on_press(TaskMessage::MarkAs(TaskStatus::InProgress));
+        let in_progress_button_right_arrow = button(text(RIGHT_ARROW_ICON).font(ICONS).size(30))
+            .on_press(TaskMessage::MarkAs(TaskStatus::InProgress))
+            .padding(5);
 
-        let in_progress_button_left_arrow = button(text(LEFT_ARROW_ICON).font(ICONS))
-            .on_press(TaskMessage::MarkAs(TaskStatus::InProgress));
+        let in_progress_button_left_arrow = button(text(LEFT_ARROW_ICON).font(ICONS).size(30))
+            .on_press(TaskMessage::MarkAs(TaskStatus::InProgress))
+            .padding(5);
 
         // greyed out buttons that don't do anything
         // Not showing them makes the widget look bad
-        let disabled_left_arrow = button(text(LEFT_ARROW_ICON).font(ICONS));
-        let disabled_right_arrow = button(text(RIGHT_ARROW_ICON).font(ICONS));
+        let disabled_left_arrow = button(text(LEFT_ARROW_ICON).font(ICONS).size(30)).padding(5);
+        let disabled_right_arrow = button(text(RIGHT_ARROW_ICON).font(ICONS).size(30)).padding(5);
 
-        let done_button = button(text(RIGHT_ARROW_ICON).font(ICONS))
-            .on_press(TaskMessage::MarkAs(TaskStatus::Done)); 
+        let done_button = button(text(RIGHT_ARROW_ICON).font(ICONS).size(30))
+            .on_press(TaskMessage::MarkAs(TaskStatus::Done))
+            .padding(5);
 
         match self.task_status {
             TaskStatus::Todo => {
@@ -78,6 +81,7 @@ impl Task {
             }
         }
         .width(80)
+        .spacing(5)
         .into()
     }
 }
