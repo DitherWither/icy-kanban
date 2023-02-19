@@ -39,12 +39,10 @@ impl iced::Sandbox for TodoApplication {
     type Message = Message;
 
     fn new() -> Self {
-        let mut application = TodoApplication {
+        TodoApplication {
             task_list: Vec::new(),
             text_input: "".to_string(),
-        };
-
-        application
+        }
     }
 
     fn title(&self) -> String {
@@ -68,7 +66,6 @@ impl iced::Sandbox for TodoApplication {
                 self.add_task(self.text_input.clone().trim());
                 self.text_input = String::new();
             }
-            
         }
     }
 
