@@ -3,7 +3,7 @@ use std::fmt::Display;
 use iced::{
     theme,
     widget::{button, row, text},
-    Alignment, Length,
+    Length,
 };
 
 use crate::{ICONS, LEFT_ARROW_ICON, RIGHT_ARROW_ICON, TRASH_CAN_ICON};

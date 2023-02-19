@@ -47,7 +47,7 @@ impl iced::Sandbox for TodoApplication {
     }
 
     fn title(&self) -> String {
-        "KanBan Board Application".to_string()
+        "Icy Kanban".to_string()
     }
 
     fn update(&mut self, message: Self::Message) {
@@ -71,7 +71,7 @@ impl iced::Sandbox for TodoApplication {
     }
 
     fn view(&self) -> iced::Element<'_, Self::Message> {
-        let title = text("Kanban Board").size(80);
+        let title = text("Icy KanBan").size(80);
 
         let new_task_display = self.new_task_display();
 
